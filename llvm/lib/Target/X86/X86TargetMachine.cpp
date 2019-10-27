@@ -60,6 +60,11 @@ static cl::opt<bool> EnableCondBrFoldingPass("x86-condbr-folding",
                                         "folding pass"),
                                cl::init(false), cl::Hidden);
 
+static cl::opt<bool> EnableSFIPass("x86-sfi",
+                              cl::desc("Enable the Software Fault Isolation "
+                                       "(SFI) pass"),
+                              cl::init(false), cl::Hidden);
+
 extern "C" void LLVMInitializeX86Target() {
   // Register the target.
   RegisterTargetMachine<X86TargetMachine> X(getTheX86_32Target());
@@ -530,6 +535,10 @@ void X86PassConfig::addPreEmitPass2() {
       (!TT.isOSWindows() ||
        MAI->getExceptionHandlingType() == ExceptionHandling::DwarfCFI))
     addPass(createCFIInstrInserter());
+
+  if (EnableSFIPass) {
+    addPass(createX86SFIPass());
+  }
 }
 
 std::unique_ptr<CSEConfigBase> X86PassConfig::getCSEConfig() const {
