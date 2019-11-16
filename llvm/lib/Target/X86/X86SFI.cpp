@@ -37,11 +37,13 @@ FunctionPass *llvm::createX86SFIPass() {
 
 bool X86SFIPass::runOnMachineFunction(MachineFunction &MF) {
     for (MachineBasicBlock &MBB : MF) {
+        // Log aligning the basic block
         LLVM_DEBUG({
-            dbgs() << "Machine Basic Block: ";
-            dbgs() << MBB.getFullName();
-            dbgs() << "\n";
+            dbgs() << "Aligning Basic Block: " + MBB.getName() + "\n";
         });
+        // Force 32-byte alignment for the basic block
+        // Emits '.p2align 5, 0x90' assembly to align using NOOPs
+        MBB.setAlignment(Align(32));
     }
     return true;
 }
